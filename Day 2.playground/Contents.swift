@@ -65,11 +65,9 @@ var validGames = 0
 var currentGame = 1
 
 for game in games {
-//    if currentGame < 101 {
         let formattedGame = game.components(separatedBy: [";", ","])
         if validateGame(game: formattedGame) { validGames += currentGame }
         currentGame += 1
-//    }
 }
 // answer
 validGames
