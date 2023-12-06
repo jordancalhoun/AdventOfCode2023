@@ -1,15 +1,15 @@
 // I will always start at the first number in the part number.
-// DONE Check if node is visited - skip if true
-// DONE Check node for number - skip if false
+// Check if node is visited - skip if true
+// Check node for number - skip if false
 // append to potential part number
-// DONE Check neighbors for symbol - flag isPartNumber=true if found
+// Check neighbors for symbol - flag isPartNumber=true if found
 
 // Check right node for additional partNumber - stop searching if false, return isPartNumber if flag is true
 // each time checking surrounding nodes for symbol (if flag as partNumber is false)
 
 import Cocoa
 
-let fileURL = Bundle.main.url(forResource: "sampleData", withExtension: ".txt")
+let fileURL = Bundle.main.url(forResource: "data", withExtension: ".txt")
 let content = try String(contentsOf: fileURL!)
 
 // Convert file into matrix
@@ -30,10 +30,9 @@ var partNumbers = [String]()
 for row in 0..<matrix.count {
     for col in 0..<matrix[row].count {
         // Skip any work if already visited
-        if visited[row][col] {
-            break
+        if !visited[row][col] {
+            traverseNode(row: row, col: col)
         }
-        traverseNode(row: row, col: col)
     }
 }
 
@@ -50,27 +49,28 @@ func traverseNode(row: Int, col: Int) {
         let col = currentNode[1]
         
         // Skip exploring node if already visited
-        if visited[row][col] {
+        guard !visited[row][col] else {
             return
+        }
+        
+        // Add to visited, if a not a special character
+        if matrix[row][col] == "." || matrix[row][col].isNumber {
+            visited[row][col] = true
         }
         
         // Skip exploring if node isn't a number
-        guard matrix[row][col] != "." else {
-            visited[row][col] = true
-            return
-        }
-        
-        guard matrix[row][col].isNumber else {
+        guard matrix[row][col] != "." && matrix[row][col].isNumber else {
             return
         }
         
         // Node is unvisited number.
         visited[row][col] = true
         currentPartNumber += String(matrix[row][col])
-        isPartNumber = isValidPartNumber(row: row, col: col)
-        
-        if let moreNodes = hasAdditionalNumbers(row: row, col: col) {
-            nodesToExplore.append(moreNodes)
+        if !isPartNumber {
+            isPartNumber = isValidPartNumber(row: row, col: col)
+        }
+        if let nextNumber = getNextNumber(row: row, col: col) {
+            nodesToExplore.append(nextNumber)
         }
     }
     
@@ -81,12 +81,8 @@ func traverseNode(row: Int, col: Int) {
     partNumbers.append(currentPartNumber)
 }
 
-func hasAdditionalNumbers(row: Int, col: Int) -> [Int]? {
-    guard col < matrix[0].count else {
-        return nil
-    }
-    
-    guard matrix[row][col+1].isNumber else {
+func getNextNumber(row: Int, col: Int) -> [Int]? {
+    guard col < matrix[0].count - 1 && matrix[row][col+1].isNumber else {
         return nil
     }
     
@@ -94,39 +90,54 @@ func hasAdditionalNumbers(row: Int, col: Int) -> [Int]? {
 }
 
 func isValidPartNumber(row: Int, col: Int) -> Bool {
-    
     // check all possible neighbors
     // top left
     if row > 0 && col > 0 && !visited[row-1][col-1] {
-        return isSpecialCharacter(matrix[row-1][col-1])
+        if isSpecialCharacter(matrix[row-1][col-1]) {
+            return true
+        }
     }
     // top center
     if row > 0 && !visited[row-1][col] {
-        return isSpecialCharacter(matrix[row-1][col])
+        if isSpecialCharacter(matrix[row-1][col]) {
+            return true
+        }
     }
     // top right
-    if row > 0 && col < matrix[0].count && !visited[row-1][col+1] {
-        return isSpecialCharacter(matrix[row-1][col+1])
+    if row > 0 && col < matrix[0].count - 1 && !visited[row-1][col+1] {
+        if isSpecialCharacter(matrix[row-1][col+1]) {
+            return true
+        }
     }
     // left
     if col > 0 && !visited[row][col-1] {
-        return isSpecialCharacter(matrix[row][col-1])
+        if isSpecialCharacter(matrix[row][col-1]) {
+            return true
+        }
     }
     // right
-    if col < matrix[0].count && !visited[row][col+1] {
-        return isSpecialCharacter(matrix[row][col+1])
+    if col < matrix[0].count - 1 && !visited[row][col+1] {
+        if isSpecialCharacter(matrix[row][col+1]) {
+            return true
+        }
     }
     // bottom left
-    if row < matrix.count && col > 0 && !visited[row+1][col-1] {
-        return isSpecialCharacter(matrix[row+1][col-1])
+    if row < matrix.count - 1 && col > 0 && !visited[row+1][col-1] {
+        if isSpecialCharacter(matrix[row+1][col-1]) {
+            return true
+        }
     }
     // bottom center
-    if row < matrix.count && !visited[row+1][col] {
-        return isSpecialCharacter(matrix[row+1][col])
+    if row < matrix.count - 1 && !visited[row+1][col] {
+        if isSpecialCharacter(matrix[row+1][col]) {
+            return true
+        }
     }
     // bottom right
-    if row < matrix.count && col < matrix[0].count && !visited[row+1][col+1] {
-        return isSpecialCharacter(matrix[row+1][col+1])
+    if row < matrix.count - 1 && col < matrix[0].count - 1  {
+        if isSpecialCharacter(matrix[row+1][col+1]) {
+            return true
+        }
     }
     
     return false
@@ -140,5 +151,9 @@ func isSpecialCharacter(_ character: Character) -> Bool {
     }
 }
 
-visited
-partNumbers
+
+var total = 0
+for number in partNumbers {
+    total += Int(number)!
+}
+total
