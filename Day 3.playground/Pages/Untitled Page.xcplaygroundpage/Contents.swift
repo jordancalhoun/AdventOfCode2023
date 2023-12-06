@@ -26,6 +26,7 @@ let hashCol = Array(repeating: false, count: matrix[0].count)
 var visited = Array(repeating: hashCol, count: matrix.count)
 
 var partNumbers = [String]()
+var parts = [String: [Int]]()
 
 for row in 0..<matrix.count {
     for col in 0..<matrix[row].count {
@@ -93,49 +94,49 @@ func isValidPartNumber(row: Int, col: Int) -> Bool {
     // check all possible neighbors
     // top left
     if row > 0 && col > 0 && !visited[row-1][col-1] {
-        if isSpecialCharacter(matrix[row-1][col-1]) {
+        if isSpecialCharacter(matrix[row-1][col-1], row: row-1, col: col-1) {
             return true
         }
     }
     // top center
     if row > 0 && !visited[row-1][col] {
-        if isSpecialCharacter(matrix[row-1][col]) {
+        if isSpecialCharacter(matrix[row-1][col], row: row-1, col: col) {
             return true
         }
     }
     // top right
     if row > 0 && col < matrix[0].count - 1 && !visited[row-1][col+1] {
-        if isSpecialCharacter(matrix[row-1][col+1]) {
+        if isSpecialCharacter(matrix[row-1][col+1], row: row-1, col: col+1) {
             return true
         }
     }
     // left
     if col > 0 && !visited[row][col-1] {
-        if isSpecialCharacter(matrix[row][col-1]) {
+        if isSpecialCharacter(matrix[row][col-1], row: row, col: col-1) {
             return true
         }
     }
     // right
     if col < matrix[0].count - 1 && !visited[row][col+1] {
-        if isSpecialCharacter(matrix[row][col+1]) {
+        if isSpecialCharacter(matrix[row][col+1], row: row, col: col+1) {
             return true
         }
     }
     // bottom left
     if row < matrix.count - 1 && col > 0 && !visited[row+1][col-1] {
-        if isSpecialCharacter(matrix[row+1][col-1]) {
+        if isSpecialCharacter(matrix[row+1][col-1], row: row+1, col: col-1) {
             return true
         }
     }
     // bottom center
     if row < matrix.count - 1 && !visited[row+1][col] {
-        if isSpecialCharacter(matrix[row+1][col]) {
+        if isSpecialCharacter(matrix[row+1][col], row: row+1, col: col) {
             return true
         }
     }
     // bottom right
     if row < matrix.count - 1 && col < matrix[0].count - 1  {
-        if isSpecialCharacter(matrix[row+1][col+1]) {
+        if isSpecialCharacter(matrix[row+1][col+1], row: row+1, col: col+1) {
             return true
         }
     }
@@ -143,12 +144,14 @@ func isValidPartNumber(row: Int, col: Int) -> Bool {
     return false
 }
 
-func isSpecialCharacter(_ character: Character) -> Bool {
-    if character != "." && !character.isNumber {
-        return true
-    } else {
+func isSpecialCharacter(_ character: Character, row: Int, col: Int) -> Bool {
+    let character = matrix[row][col]
+    let key = String(row) + String(col)
+    if character == "." || character.isNumber {
         return false
     }
+    
+    return true
 }
 
 
@@ -157,3 +160,16 @@ for number in partNumbers {
     total += Int(number)!
 }
 total
+
+// indexMap of * characters and the count of numbers assosiated with it
+// [[row,col]: [partNumber]
+
+// A * with exactly two numbers adjacent
+// multiply the two numbers
+// add the list of these ratios together
+
+struct gear {
+    let location: (Int, Int)
+    let partNumbers: [Int]
+    
+}
